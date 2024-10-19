@@ -97,6 +97,13 @@ fn main() {
         .as_u64()
         .unwrap() as u32;
 
+    let signatures = parsed_data["signedClaim"]["signatures"]
+        .as_array()
+        .unwrap()
+        .iter() // Changed from into_iter() to iter()
+        .map(|v| v.as_str().unwrap().to_string().into())
+        .collect::<Vec<Bytes>>();
+
     // encode ABI
     let bytes = PublicValuesStruct::abi_encode(&PublicValuesStruct {
         hashedClaimInfo: hashed_claim_info,
@@ -107,12 +114,12 @@ fn main() {
                 owner,
                 timestampS: timestamp,
             },
-            signatures: vec![],
+            signatures,
         },
     });
 
     println!("bytes: {:?}", bytes);
-    println!("encoded: {:?}", hex::encode(&bytes.as_slice()));
+    println!("encoded: {:?}", hex::encode(bytes.as_slice())); // Removed the borrow operator
     println!("output: {:?}", Bytes::from(bytes.clone()));
 
     // decode and assert
